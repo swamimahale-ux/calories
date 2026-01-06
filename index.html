@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fitness Tracker | Shripad</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:#0d0d0d;color:#fff;padding:30px}
+.container{max-width:1300px;margin:auto}
+header{margin-bottom:30px}
+header h1{font-size:2.6rem}
+header p{color:#aaa}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+
+/* CARD */
+.card{background:rgba(255,255,255,0.05);border-radius:16px;padding:22px;border:1px solid rgba(255,255,255,0.1)}
+.card h2{margin-bottom:12px}
+
+/* INPUT */
+label{font-size:.85rem;color:#bbb}
+input,select{width:100%;margin:6px 0 14px;padding:12px;border-radius:10px;border:none;background:#1a1a1a;color:#fff}
+
+/* BUTTON */
+button{width:100%;padding:14px;border-radius:12px;border:none;background:#7cffc4;font-weight:600;cursor:pointer}
+button:hover{opacity:.85}
+
+/* LIST */
+ul{list-style:none}
+li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1)}
+.delete{color:#ff5c5c;cursor:pointer}
+
+/* PROGRESS CIRCLE */
+.circle{width:160px;height:160px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;background:conic-gradient(#7cffc4 0%,#333 0%)}
+.circle span{font-size:1.4rem;font-weight:600}
+
+.stat{text-align:center;margin-top:8px;color:#ccc}
+canvas{margin-top:10px}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+<h1>🏋️ Fitness Tracker</h1>
+<p>Workouts • Food • Maintenance • Weekly & Monthly Analytics</p>
+</header>
+
+<div class="grid">
+
+<!-- WORKOUT -->
+<div class="card">
+<h2>🔥 Workouts</h2>
+<label>Workout Name</label>
+<input id="workoutName">
+<label>Calories Burned</label>
+<input id="workoutCalories" type="number">
+<button onclick="addWorkout()">Add Workout</button>
+<ul id="workoutList"></ul>
+</div>
+
+<!-- FOOD -->
+<div class="card">
+<h2>🍽️ Food Intake</h2>
+<label>Food Item</label>
+<input id="foodName">
+<label>Calories Consumed</label>
+<input id="foodCalories" type="number">
+<button onclick="addFood()">Add Food</button>
+<ul id="foodList"></ul>
+</div>
+
+<!-- DAILY PROGRESS -->
+<div class="card">
+<h2> Daily Progress</h2>
+<div class="circle" id="progressCircle">
+<span id="progressText">0%</span>
+</div>
+<div class="stat">Maintenance: <span id="maintenance">0</span> kcal</div>
+<div class="stat">Consumed: <span id="consumed">0</span> kcal</div>
+
+<hr style="margin:14px 0;opacity:.15">
+
+<label>Height (cm)</label>
+<input id="height" type="number">
+<label>Weight (kg)</label>
+<input id="weight" type="number">
+<button onclick="calculateMaintenance()">Calculate Maintenance</button>
+</div>
+
+<!-- WEEKLY -->
+<div class="card">
+<h2>📊 Weekly Progress</h2>
+<canvas id="weeklyChart"></canvas>
+</div>
+
+<!-- MONTHLY -->
+<div class="card">
+<h2>📅 Monthly Progress</h2>
+<select id="monthSelect" onchange="updateMonthlyChart()"></select>
+<canvas id="monthlyChart"></canvas>
+</div>
+
+</div>
+</div>
+
+<script>
+let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
+let foods = JSON.parse(localStorage.getItem("foods")) || [];
+let maintenanceCalories = Number(localStorage.getItem("maintenance")) || 0;
+
+/* ADD */
+function addWorkout() {
+  workouts.push({ name: workoutName.value, cal: +workoutCalories.value, date: new Date().toISOString() });
+  save();
+}
+
+function addFood() {
+  foods.push({ name: foodName.value, cal: +foodCalories.value, date: new Date().toISOString() });
+  save();
+}
+
+/* DELETE */
+function del(type, i) {
+  type === 'w' ? workouts.splice(i, 1) : foods.splice(i, 1);
+  save();
+}
+
+/* MAINTENANCE */
+function calculateMaintenance() {
+  const h = +height.value;
+  const w = +weight.value;
+  const age = 21;
+  const bmr = 10 * w + 6.25 * h - 5 * age + 5;
+  maintenanceCalories = Math.round(bmr * 1.2);
+  localStorage.setItem("maintenance", maintenanceCalories);
+  render();
+}
+
+/* SAVE */
+function save() {
+  localStorage.setItem("workouts", JSON.stringify(workouts));
+  localStorage.setItem("foods", JSON.stringify(foods));
+  workoutName.value = workoutCalories.value = foodName.value = foodCalories.value = "";
+  render();
+}
+
+/* RENDER */
+function render() {
+  workoutList.innerHTML = "";
+  foodList.innerHTML = "";
+
+  let burned = 0;
+  let consumed = 0;
+
+  workouts.forEach((w, i) => {
+    burned += w.cal;
+    workoutList.innerHTML += `
+      <li>${w.name} (${w.cal})
+      <span class="delete" onclick="del('w',${i})">✖</span></li>`;
+  });
+
+  foods.forEach((f, i) => {
+    consumed += f.cal;
+    foodList.innerHTML += `
+      <li>${f.name} (${f.cal})
+      <span class="delete" onclick="del('f',${i})">✖</span></li>`;
+  });
+
+  const netCalories = consumed - burned;
+
+  document.getElementById("maintenance").textContent = maintenanceCalories;
+  document.getElementById("consumed").textContent = netCalories;
+
+  /* PROGRESS CIRCLE */
+  let percent = maintenanceCalories
+    ? Math.round((netCalories / maintenanceCalories) * 100)
+    : 0;
+
+  percent = Math.max(0, percent);
+
+  progressText.textContent = percent + "%";
+  progressCircle.style.background = `
+    conic-gradient(
+      ${percent > 100 ? '#ff5c5c' : '#7cffc4'} ${percent}%,
+      #333 0%
+    )`;
+
+  updateWeeklyChart();
+  updateMonthlyChart();
+}
+
+/* WEEKLY NET CALORIES */
+function updateWeeklyChart() {
+  let data = Array(7).fill(0);
+
+  foods.forEach(f => {
+    let d = new Date(f.date);
+    let day = (d.getDay() + 6) % 7;
+    data[day] += f.cal;
+  });
+
+  workouts.forEach(w => {
+    let d = new Date(w.date);
+    let day = (d.getDay() + 6) % 7;
+    data[day] -= w.cal;
+  });
+
+  weeklyChart.data.datasets[0].data = data;
+  weeklyChart.update();
+}
+
+/* MONTHLY NET CALORIES */
+function updateMonthlyChart() {
+  let m = +monthSelect.value;
+  let weeks = [0, 0, 0, 0, 0];
+
+  foods.forEach(f => {
+    let d = new Date(f.date);
+    if (d.getMonth() === m) {
+      weeks[Math.floor((d.getDate() - 1) / 7)] += f.cal;
+    }
+  });
+
+  workouts.forEach(w => {
+    let d = new Date(w.date);
+    if (d.getMonth() === m) {
+      weeks[Math.floor((d.getDate() - 1) / 7)] -= w.cal;
+    }
+  });
+
+  monthlyChart.data.datasets[0].data = weeks;
+  monthlyChart.update();
+}
+
+/* CHARTS */
+const weeklyChart = new Chart(document.getElementById("weeklyChart"), {
+  type: 'bar',
+  data: {
+    labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    datasets: [{
+      label: "Net Calories",   // ✅ FIX
+      data: [],
+      backgroundColor: "#7cffc4"
+    }]
+  },
+  options: {
+    plugins: {
+      legend: {
+        labels: {
+          color: "#aaa"
+        }
+      }
+    }
+  }
+});
+
+
+const monthlyChart = new Chart(document.getElementById("monthlyChart"), {
+  type: 'line',
+  data: {
+    labels: ["Week 1","Week 2","Week 3","Week 4","Week 5"],
+    datasets: [{
+      label: "Weekly Net Calories",   // ✅ FIX
+      data: [],
+      borderColor: "#7cffc4",
+      tension: 0.4
+    }]
+  },
+  options: {
+    plugins: {
+      legend: {
+        labels: {
+          color: "#aaa"
+        }
+      }
+    }
+  }
+});
+
+
+/* MONTH SELECT */
+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+.forEach((m,i)=>monthSelect.innerHTML+=`<option value="${i}">${m}</option>`);
+
+monthSelect.value = new Date().getMonth();
+render();
+</script>
