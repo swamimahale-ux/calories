@@ -5,43 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fitness Tracker | Shripad</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-body{background:#0d0d0d;color:#fff;padding:30px}
+body{background:#0d0d0d;color:#fff;padding:30px;font-size:16px}
 .container{max-width:1300px;margin:auto}
 header{margin-bottom:30px}
-header h1{font-size:2.6rem}
-header p{color:#aaa}
+header h1{font-size:3rem}
+header p{color:#aaa;font-size:1.1rem
+}/* ENHANCED DROPDOWN VISIBILITY */
+select {
+  background-color: #1f1f1f;
+  border: 1px solid rgba(124, 255, 196, 0.4);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 
+  background-image:
+    linear-gradient(45deg, transparent 50%, #7cffc4 50%),
+    linear-gradient(135deg, #7cffc4 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) 50%,
+    calc(100% - 14px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+/* Hover effect */
+select:hover {
+  border-color: #7cffc4;
+}
+
+/* Focus (when clicked) */
+select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 255, 196, 0.3);
+}
+
+/* Disabled months (future months) */
+select option:disabled {
+  color: #555;
+}
+select {
+  font-weight: 600;
+}
 /* GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:24px;
+  grid-auto-rows:1fr;
+}
 
 /* CARD */
-.card{background:rgba(255,255,255,0.05);border-radius:16px;padding:22px;border:1px solid rgba(255,255,255,0.1)}
-.card h2{margin-bottom:12px}
+.card{
+  background:rgba(255,255,255,0.05);
+  border-radius:18px;
+  padding:24px;
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;
+  flex-direction:column;
+}
+.card h2{margin-bottom:14px;font-size:1.6rem}
 
 /* INPUT */
-label{font-size:.85rem;color:#bbb}
-input,select{width:100%;margin:6px 0 14px;padding:12px;border-radius:10px;border:none;background:#1a1a1a;color:#fff}
+label{font-size:1rem;color:#bbb}
+input,select{
+  width:100%;
+  margin:8px 0 16px;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  background:#1a1a1a;
+  color:#fff;
+  font-size:1rem;
+}
 
 /* BUTTON */
-button{width:100%;padding:14px;border-radius:12px;border:none;background:#7cffc4;font-weight:600;cursor:pointer}
-button:hover{opacity:.85}
+button{
+  width:100%;
+  padding:15px;
+  border-radius:14px;
+  border:none;
+  background:#7cffc4;
+  font-weight:600;
+  font-size:1rem;
+  cursor:pointer;
+  margin-top:6px;
+}
+button.secondary{background:#333}
+button.danger{background:#ff5c5c;color:#000}
 
 /* LIST */
-ul{list-style:none}
-li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1)}
+ul{list-style:none;overflow-y:auto}
+li{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,0.1)
+}
 .delete{color:#ff5c5c;cursor:pointer}
 
-/* PROGRESS CIRCLE */
-.circle{width:160px;height:160px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;background:conic-gradient(#7cffc4 0%,#333 0%)}
-.circle span{font-size:1.4rem;font-weight:600}
+/* PROGRESS */
+.progress-card{text-align:center;align-items:center}
+.circle{
+  width:170px;height:170px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:18px 0;
+  background:conic-gradient(#7cffc4 0%, #333 0%);
+}
+.circle span{font-size:1.6rem;font-weight:600}
 
-.stat{text-align:center;margin-top:8px;color:#ccc}
-canvas{margin-top:10px}
+.stat{font-size:1.05rem;margin-top:6px}
+.green{color:#7cffc4}
+.red{color:#ff5c5c}
+
+canvas{height:260px !important}
+.empty{color:#777;text-align:center;margin-top:10px}
+.undo{color:#7cffc4;cursor:pointer;margin-left:8px}
 </style>
 </head>
 
@@ -50,49 +134,69 @@ canvas{margin-top:10px}
 
 <header>
 <h1>🏋️ Fitness Tracker</h1>
-<p>Workouts • Food • Maintenance • Weekly & Monthly Analytics</p>
+<p>Workouts • Food • Maintenance • Analytics</p>
 </header>
 
 <div class="grid">
 
+<!-- MAINTENANCE -->
+<div class="card">
+<h2>🧮 Maintenance Calories</h2>
+<input id="height" placeholder="Height (cm)" type="number">
+<input id="weight" placeholder="Weight (kg)" type="number">
+
+<select id="activity">
+<option value="1.2">Sedentary</option>
+<option value="1.375">Light</option>
+<option value="1.55">Moderate</option>
+<option value="1.725">Active</option>
+</select>
+
+<select id="goalMode">
+<option value="0">Maintain</option>
+<option value="-300">Cut</option>
+<option value="300">Bulk</option>
+</select>
+
+<button onclick="calculateMaintenance()">Calculate</button>
+<div class="stat">Goal Calories: <b><span id="maintenance">0</span></b></div>
+</div>
+
 <!-- WORKOUT -->
 <div class="card">
 <h2>🔥 Workouts</h2>
-<label>Workout Name</label>
-<input id="workoutName">
-<label>Calories Burned</label>
-<input id="workoutCalories" type="number">
+
+<select id="workoutPreset" onchange="applyWorkoutPreset()">
+<option value="">Workout Suggestions</option>
+<option value="Running|300">Running</option>
+<option value="Walking|150">Walking</option>
+<option value="Cycling|250">Cycling</option>
+<option value="Chest Workout|200">Chest</option>
+<option value="Back Workout|220">Back</option>
+<option value="Leg Day|350">Leg Day</option>
+<option value="HIIT|400">HIIT</option>
+<option value="Yoga|120">Yoga</option>
+</select>
+
+<input id="workoutName" placeholder="Workout name">
+<input id="workoutCalories" type="number" placeholder="Calories burned">
+
 <button onclick="addWorkout()">Add Workout</button>
 <ul id="workoutList"></ul>
+<div class="empty" id="workoutEmpty">No workouts logged 🔥</div>
 </div>
 
 <!-- FOOD -->
 <div class="card">
 <h2>🍽️ Food Intake</h2>
-<label>Food Item</label>
-<input id="foodName">
-<label>Calories Consumed</label>
-<input id="foodCalories" type="number">
+
+<input id="foodName" placeholder="Food item">
+<button class="secondary" onclick="searchCalories()">🔍 Search Calories</button>
+<input id="foodCalories" type="number" placeholder="Calories">
+
 <button onclick="addFood()">Add Food</button>
 <ul id="foodList"></ul>
-</div>
-
-<!-- DAILY PROGRESS -->
-<div class="card">
-<h2> Daily Progress</h2>
-<div class="circle" id="progressCircle">
-<span id="progressText">0%</span>
-</div>
-<div class="stat">Maintenance: <span id="maintenance">0</span> kcal</div>
-<div class="stat">Consumed: <span id="consumed">0</span> kcal</div>
-
-<hr style="margin:14px 0;opacity:.15">
-
-<label>Height (cm)</label>
-<input id="height" type="number">
-<label>Weight (kg)</label>
-<input id="weight" type="number">
-<button onclick="calculateMaintenance()">Calculate Maintenance</button>
+<div class="empty" id="foodEmpty">No food logged 🍽️</div>
 </div>
 
 <!-- WEEKLY -->
@@ -104,192 +208,156 @@ canvas{margin-top:10px}
 <!-- MONTHLY -->
 <div class="card">
 <h2>📅 Monthly Progress</h2>
-<select id="monthSelect" onchange="updateMonthlyChart()"></select>
+<select id="monthSelect"></select>
 <canvas id="monthlyChart"></canvas>
+</div>
+
+<!-- DAILY STATUS -->
+<div class="card progress-card">
+<h2>⚠️ Daily Status</h2>
+<div class="circle" id="progressCircle"><span id="progressText">0%</span></div>
+<div id="fatWarning" class="red" style="display:none">
+That's why you are fat. Eat less.
+</div>
+<div class="stat">Goal: <span id="maintenanceProgress">0</span></div>
+<div class="stat">Net: <span id="netCaloriesProgress">0</span></div>
+<button class="danger" onclick="resetDay()">End Day</button>
 </div>
 
 </div>
 </div>
 
 <script>
-let workouts = JSON.parse(localStorage.getItem("workouts")) || [];
-let foods = JSON.parse(localStorage.getItem("foods")) || [];
-let maintenanceCalories = Number(localStorage.getItem("maintenance")) || 0;
+let workouts=JSON.parse(localStorage.getItem("workouts"))||[];
+let foods=JSON.parse(localStorage.getItem("foods"))||[];
+let maintenanceCalories=Number(localStorage.getItem("maintenance"))||0;
+let lastDeleted=null;
+
+/* GOOGLE SEARCH */
+function searchCalories(){
+  if(!foodName.value)return;
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(foodName.value+" calories per 100g")}`,"_blank");
+}
 
 /* ADD */
-function addWorkout() {
-  workouts.push({ name: workoutName.value, cal: +workoutCalories.value, date: new Date().toISOString() });
+function addWorkout(){
+  if(!workoutName.value||!workoutCalories.value)return;
+  workouts.push({name:workoutName.value,cal:+workoutCalories.value,date:new Date()});
+  workoutName.value=workoutCalories.value=workoutPreset.value="";
+  save();
+}
+function addFood(){
+  if(!foodName.value||!foodCalories.value)return;
+  foods.push({name:foodName.value,cal:+foodCalories.value,date:new Date()});
+  foodName.value=foodCalories.value="";
   save();
 }
 
-function addFood() {
-  foods.push({ name: foodName.value, cal: +foodCalories.value, date: new Date().toISOString() });
+/* DELETE + UNDO */
+function del(type,i){
+  lastDeleted={type,data:type==='w'?workouts.splice(i,1)[0]:foods.splice(i,1)[0]};
   save();
+  setTimeout(()=>lastDeleted=null,5000);
 }
 
-/* DELETE */
-function del(type, i) {
-  type === 'w' ? workouts.splice(i, 1) : foods.splice(i, 1);
+/* RESET DAY */
+function resetDay(){
+  const today=new Date().toDateString();
+  workouts=workouts.filter(w=>new Date(w.date).toDateString()!==today);
+  foods=foods.filter(f=>new Date(f.date).toDateString()!==today);
   save();
 }
 
 /* MAINTENANCE */
-function calculateMaintenance() {
-  const h = +height.value;
-  const w = +weight.value;
-  const age = 21;
-  const bmr = 10 * w + 6.25 * h - 5 * age + 5;
-  maintenanceCalories = Math.round(bmr * 1.2);
-  localStorage.setItem("maintenance", maintenanceCalories);
-  render();
+function calculateMaintenance(){
+  const bmr=10*weight.value+6.25*height.value-5*21+5;
+  maintenanceCalories=Math.round(bmr*activity.value)+Number(goalMode.value);
+  save();
 }
 
 /* SAVE */
-function save() {
-  localStorage.setItem("workouts", JSON.stringify(workouts));
-  localStorage.setItem("foods", JSON.stringify(foods));
-  workoutName.value = workoutCalories.value = foodName.value = foodCalories.value = "";
+function save(){
+  localStorage.setItem("workouts",JSON.stringify(workouts));
+  localStorage.setItem("foods",JSON.stringify(foods));
+  localStorage.setItem("maintenance",maintenanceCalories);
   render();
 }
 
 /* RENDER */
-function render() {
-  workoutList.innerHTML = "";
-  foodList.innerHTML = "";
+function render(){
+  workoutList.innerHTML=foodList.innerHTML="";
+  let burned=0,consumed=0;
 
-  let burned = 0;
-  let consumed = 0;
-
-  workouts.forEach((w, i) => {
-    burned += w.cal;
-    workoutList.innerHTML += `
-      <li>${w.name} (${w.cal})
-      <span class="delete" onclick="del('w',${i})">✖</span></li>`;
+  workouts.forEach((w,i)=>{
+    burned+=w.cal;
+    workoutList.innerHTML+=`<li>${w.name} (${w.cal}) <span class="delete" onclick="del('w',${i})">✖</span></li>`;
   });
 
-  foods.forEach((f, i) => {
-    consumed += f.cal;
-    foodList.innerHTML += `
-      <li>${f.name} (${f.cal})
-      <span class="delete" onclick="del('f',${i})">✖</span></li>`;
+  foods.forEach((f,i)=>{
+    consumed+=f.cal;
+    foodList.innerHTML+=`<li>${f.name} (${f.cal}) <span class="delete" onclick="del('f',${i})">✖</span></li>`;
   });
 
-  const netCalories = consumed - burned;
+  workoutEmpty.style.display=workouts.length?"none":"block";
+  foodEmpty.style.display=foods.length?"none":"block";
 
-  document.getElementById("maintenance").textContent = maintenanceCalories;
-  document.getElementById("consumed").textContent = netCalories;
+  const net=consumed-burned;
+  maintenance.textContent=maintenanceProgress.textContent=maintenanceCalories;
+  netCaloriesProgress.textContent=net;
+  netCaloriesProgress.className=net>maintenanceCalories?"red":"green";
 
-  /* PROGRESS CIRCLE */
-  let percent = maintenanceCalories
-    ? Math.round((netCalories / maintenanceCalories) * 100)
-    : 0;
-
-  percent = Math.max(0, percent);
-
-  progressText.textContent = percent + "%";
-  progressCircle.style.background = `
-    conic-gradient(
-      ${percent > 100 ? '#ff5c5c' : '#7cffc4'} ${percent}%,
-      #333 0%
-    )`;
+  let percent=maintenanceCalories?Math.round(net/maintenanceCalories*100):0;
+  progressText.textContent=percent+"%";
+  progressCircle.style.background=`conic-gradient(${percent>100?'#ff5c5c':'#7cffc4'} ${Math.min(percent,100)}%, #333 0%)`;
+  fatWarning.style.display=percent>100?"block":"none";
 
   updateWeeklyChart();
   updateMonthlyChart();
 }
 
-/* WEEKLY NET CALORIES */
-function updateWeeklyChart() {
-  let data = Array(7).fill(0);
+/* CHARTS */
+const weeklyChart=new Chart(document.getElementById("weeklyChart"),{
+type:'bar',
+data:{labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],datasets:[{data:[0,0,0,0,0,0,0],backgroundColor:"#7cffc4"}]},
+});
 
-  foods.forEach(f => {
-    let d = new Date(f.date);
-    let day = (d.getDay() + 6) % 7;
-    data[day] += f.cal;
-  });
+const monthlyChart=new Chart(document.getElementById("monthlyChart"),{
+type:'line',
+data:{labels:["W1","W2","W3","W4","W5"],datasets:[{data:[0,0,0,0,0],borderColor:"#7cffc4",tension:.4}]},
+});
 
-  workouts.forEach(w => {
-    let d = new Date(w.date);
-    let day = (d.getDay() + 6) % 7;
-    data[day] -= w.cal;
-  });
-
-  weeklyChart.data.datasets[0].data = data;
+/* UPDATE CHARTS */
+function updateWeeklyChart(){
+  let d=Array(7).fill(0);
+  foods.forEach(f=>d[(new Date(f.date).getDay()+6)%7]+=f.cal);
+  workouts.forEach(w=>d[(new Date(w.date).getDay()+6)%7]-=w.cal);
+  weeklyChart.data.datasets[0].data=d;
   weeklyChart.update();
 }
-
-/* MONTHLY NET CALORIES */
-function updateMonthlyChart() {
-  let m = +monthSelect.value;
-  let weeks = [0, 0, 0, 0, 0];
-
-  foods.forEach(f => {
-    let d = new Date(f.date);
-    if (d.getMonth() === m) {
-      weeks[Math.floor((d.getDate() - 1) / 7)] += f.cal;
-    }
-  });
-
-  workouts.forEach(w => {
-    let d = new Date(w.date);
-    if (d.getMonth() === m) {
-      weeks[Math.floor((d.getDate() - 1) / 7)] -= w.cal;
-    }
-  });
-
-  monthlyChart.data.datasets[0].data = weeks;
+function updateMonthlyChart(){
+  let m=monthSelect.value,w=[0,0,0,0,0];
+  foods.forEach(f=>{let d=new Date(f.date);if(d.getMonth()==m)w[Math.floor((d.getDate()-1)/7)]+=f.cal});
+  workouts.forEach(wk=>{let d=new Date(wk.date);if(d.getMonth()==m)w[Math.floor((d.getDate()-1)/7)]-=wk.cal});
+  monthlyChart.data.datasets[0].data=w;
   monthlyChart.update();
 }
 
-/* CHARTS */
-const weeklyChart = new Chart(document.getElementById("weeklyChart"), {
-  type: 'bar',
-  data: {
-    labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
-    datasets: [{
-      label: "Net Calories",   // ✅ FIX
-      data: [],
-      backgroundColor: "#7cffc4"
-    }]
-  },
-  options: {
-    plugins: {
-      legend: {
-        labels: {
-          color: "#aaa"
-        }
-      }
-    }
-  }
-});
-
-
-const monthlyChart = new Chart(document.getElementById("monthlyChart"), {
-  type: 'line',
-  data: {
-    labels: ["Week 1","Week 2","Week 3","Week 4","Week 5"],
-    datasets: [{
-      label: "Weekly Net Calories",   // ✅ FIX
-      data: [],
-      borderColor: "#7cffc4",
-      tension: 0.4
-    }]
-  },
-  options: {
-    plugins: {
-      legend: {
-        labels: {
-          color: "#aaa"
-        }
-      }
-    }
-  }
-});
-
-
-/* MONTH SELECT */
+/* MONTH DROPDOWN */
+const curMonth=new Date().getMonth();
 ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-.forEach((m,i)=>monthSelect.innerHTML+=`<option value="${i}">${m}</option>`);
+.forEach((m,i)=>monthSelect.innerHTML+=`<option value="${i}" ${i>curMonth?"disabled":""}>${m}</option>`);
+monthSelect.value=curMonth;
+monthSelect.addEventListener("change",updateMonthlyChart);
 
-monthSelect.value = new Date().getMonth();
+/* PRESET */
+function applyWorkoutPreset(){
+  if(!workoutPreset.value)return;
+  const[n,c]=workoutPreset.value.split("|");
+  workoutName.value=n;
+  workoutCalories.value=c;
+}
+
 render();
 </script>
+</body>
+</html>
